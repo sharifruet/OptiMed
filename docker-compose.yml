@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: hms_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: hospital_management
+      MYSQL_USER: hms_user
+      MYSQL_PASSWORD: hms_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./requirement/dbscript.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - hms_network
+    command: --default-authentication-plugin=mysql_native_password
+
+  # Node.js Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: hms_backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 5000
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: hospital_management
+      DB_USER: hms_user
+      DB_PASSWORD: hms_password
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      JWT_EXPIRE: 24h
+    ports:
+      - "5001:5000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      - mysql
+    networks:
+      - hms_network
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: hms_frontend
+    restart: unless-stopped
+    environment:
+      REACT_APP_API_URL: http://localhost:5001/api
+      REACT_APP_ENV: development
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - hms_network
+
+  # phpMyAdmin (Optional - for database management)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: hms_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: hms_user
+      PMA_PASSWORD: hms_password
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+    networks:
+      - hms_network
+
+volumes:
+  mysql_data:
+
+networks:
+  hms_network:
+    driver: bridge 
