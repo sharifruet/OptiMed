@@ -7,7 +7,7 @@ services:
     container_name: hms_mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_ROOT_PASSWORD: toor
       MYSQL_DATABASE: hospital_management
       MYSQL_USER: hms_user
       MYSQL_PASSWORD: hms_password
@@ -64,23 +64,6 @@ services:
       - /app/node_modules
     depends_on:
       - backend
-    networks:
-      - hms_network
-
-  # phpMyAdmin (Optional - for database management)
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: hms_phpmyadmin
-    restart: unless-stopped
-    environment:
-      PMA_HOST: mysql
-      PMA_PORT: 3306
-      PMA_USER: hms_user
-      PMA_PASSWORD: hms_password
-    ports:
-      - "8080:80"
-    depends_on:
-      - mysql
     networks:
       - hms_network
 

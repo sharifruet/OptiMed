@@ -16,10 +16,14 @@ import OperationTheater from './pages/OperationTheater';
 import ICU from './pages/ICU';
 import Roster from './pages/Roster';
 import Reports from './pages/Reports';
+import RoleManagement from './pages/RoleManagement';
+import DoctorSchedule from './pages/DoctorSchedule';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
+
+  console.log('ProtectedRoute - user:', user, 'loading:', loading);
 
   if (loading) {
     return (
@@ -30,9 +34,11 @@ const ProtectedRoute = ({ children }) => {
   }
 
   if (!user) {
+    console.log('No user, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
+  console.log('User authenticated, rendering children');
   return children;
 };
 
@@ -65,6 +71,8 @@ function App() {
           <Route path="icu" element={<ICU />} />
           <Route path="roster" element={<Roster />} />
           <Route path="reports" element={<Reports />} />
+          <Route path="roles" element={<RoleManagement />} />
+          <Route path="doctor-schedules" element={<DoctorSchedule />} />
         </Route>
 
         {/* Catch all route */}
